@@ -18,8 +18,8 @@ class TheLastSignalEnv(gym.Env):
     
     Observation Space:
         - Local map (7x7x3): signal presence, hazard probability, agent position
-        - Agent state (4): normalized x, y, health, time
-        - Total: 151-dimensional vector
+        - Agent state (5): normalized x, y, health, energy, time
+        - Total: 152-dimensional vector
     
     Action Space:
         - 0: MOVE_UP
@@ -36,6 +36,7 @@ class TheLastSignalEnv(gym.Env):
           - time_cost: -0.01 per step
           - stabilization: +0.5 for proactive hazard reduction
           - exploration: +0.1 for visiting new cells
+          - energy_cost: -0.1 per energy unit consumed 
     """
     
     metadata = {
@@ -65,7 +66,7 @@ class TheLastSignalEnv(gym.Env):
         radius = config.observation_radius
         obs_size = 2 * radius + 1
         local_map_size = obs_size * obs_size * 3  # 7x7x3 = 147
-        agent_state_size = 4  # x, y, health, time
+        agent_state_size = 5  # x, y, health, time,energy
         total_obs_size = local_map_size + agent_state_size
         
         # Define observation space
@@ -101,6 +102,7 @@ class TheLastSignalEnv(gym.Env):
         info = {
             "episode_info": {
                 "health": self.game.health,
+                "energy": self.game.energy,
                 "time_remaining": self.game.time_remaining,
                 "signals_available": sum(1 for y in range(self.config.grid_height) 
                                          for x in range(self.config.grid_width) 
@@ -137,6 +139,7 @@ class TheLastSignalEnv(gym.Env):
             "hazard_damage": reward_vector.hazard_damage,
             "time_cost": reward_vector.time_cost,
             "stabilization": reward_vector.stabilization,
+            "energy_cost": reward_vector.energy_cost,
             "exploration": reward_vector.exploration,
             "total": reward_vector.total,
         })
@@ -150,6 +153,7 @@ class TheLastSignalEnv(gym.Env):
             "hazard_damage": float(reward_vector.hazard_damage),
             "time_cost": float(reward_vector.time_cost),
             "stabilization": float(reward_vector.stabilization),
+            "energy_cost": float(reward_vector.energy_cost),
             "exploration": float(reward_vector.exploration),
         }
         

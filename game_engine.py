@@ -45,6 +45,7 @@ class RewardVector:
     time_cost: float = 0.0
     stabilization: float = 0.0
     exploration: float = 0.0
+    energy_cost: float = 0.0 
     
     @property
     def total(self) -> float:
@@ -65,6 +66,7 @@ class GameEngine:
         self.agent_x = 0
         self.agent_y = 0
         self.health = config.initial_health
+        self.energy = config.initial_energy 
         self.time_remaining = config.time_budget
         self.episode_step = 0
         self.visited_cells = set()
@@ -112,7 +114,12 @@ class GameEngine:
         # Hazard triggers with cell's probability
         if self.rng.rand() < cell.hazard_probability:
             damage = self.rng.randint(*self.config.hazard_damage_range)
+
+            if self.energy < self.config.low_energy_threshold:
+                damage = int(damage * self.config.low_energy_damage_multiplier)
+            
             self.health = max(0, self.health - damage)
+
         
         return float(damage)
     
@@ -129,27 +136,39 @@ class GameEngine:
         self.episode_step += 1
         self.time_remaining -= 1
         reward = RewardVector()
+
+        energy_consumed = 0.0
         
         # Handle movement actions
         new_x, new_y = self.agent_x, self.agent_y
         
         if action == Action.MOVE_UP:
             new_y = max(0, self.agent_y - 1)
+            energy_consumed = self.config.move_energy_cost
         elif action == Action.MOVE_DOWN:
             new_y = min(self.config.grid_height - 1, self.agent_y + 1)
+            energy_consumed = self.config.move_energy_cost
         elif action == Action.MOVE_LEFT:
             new_x = max(0, self.agent_x - 1)
+            energy_consumed = self.config.move_energy_cost
         elif action == Action.MOVE_RIGHT:
             new_x = min(self.config.grid_width - 1, self.agent_x + 1)
+            energy_consumed = self.config.move_energy_cost
         elif action == Action.STABILIZE:
             # Reduce hazard at current cell
             cell = self.grid[self.agent_y][self.agent_x]
             reduction = self.config.stabilize_reduction * cell.hazard_probability
             cell.hazard_probability = max(0, cell.hazard_probability - reduction)
             reward.stabilization = self.config.stabilization_reward
+            energy_consumed = self.config.stabilize_energy_cost
         elif action == Action.WAIT:
             # No movement
-            pass
+            energy_gain = min(self.config.wait_energy_gain, 
+                            self.config.max_energy - self.energy)
+            self.energy = min(self.config.max_energy, self.energy + energy_gain)
+        
+        self.energy = max(0, self.energy - energy_consumed)
+        reward.energy_cost = -energy_consumed * self.config.energy_depletion_penalty
         
         # Update position if movement happened
         if (new_x, new_y) != (self.agent_x, self.agent_y):
@@ -184,7 +203,9 @@ class GameEngine:
                     )
         
         # Check termination
-        terminated = self.health <= 0 or self.time_remaining <= 0
+        terminated = (self.health <= 0 or 
+                     self.time_remaining <= 0 or 
+                     self.energy <= 0)
         
         # Generate observation
         observation = self._get_observation()
@@ -192,11 +213,14 @@ class GameEngine:
         info = {
             "step": self.episode_step,
             "health": self.health,
+            "energy": self.energy,
             "time_remaining": self.time_remaining,
             "signals_collected": sum(1 for y in range(self.config.grid_height) 
                                      for x in range(self.config.grid_width) 
                                      if self.grid[y][x].signal_collected),
             "damage_taken": damage,
+            "energy_consumed": energy_consumed,  # NEW
+            "is_low_energy": self.energy < self.config.low_energy_threshold,
         }
         
         return observation, reward, terminated, info
@@ -228,6 +252,7 @@ class GameEngine:
             self.agent_x / self.config.grid_width,
             self.agent_y / self.config.grid_height,
             self.health / self.config.max_health,
+            self.energy / self.config.max_energy,
             self.time_remaining / self.config.time_budget,
         ], dtype=np.float32)
         
@@ -238,6 +263,7 @@ class GameEngine:
     def reset(self):
         """Reset game to initial state."""
         self.health = self.config.initial_health
+        self.energy = self.config.initial_energy
         self.time_remaining = self.config.time_budget
         self.episode_step = 0
         self.visited_cells = set()
@@ -249,7 +275,8 @@ class GameEngine:
         Render the game state to console (text-based).
         """
         print("\n" + "=" * 60)
-        print(f"Step: {self.episode_step} | Health: {self.health} | Time: {self.time_remaining}")
+        print(f"Step: {self.episode_step} | Health: {self.health}/{self.config.max_health} | "
+                  f"Energy: {self.energy}/{self.config.max_energy} | Time: {self.time_remaining}")
         print("=" * 60)
         
         for y in range(self.config.grid_height):
