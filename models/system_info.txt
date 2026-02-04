@@ -1,0 +1,8 @@
+- OS: Linux-6.8.0-1030-azure-x86_64-with-glibc2.39 # 35~22.04.1-Ubuntu SMP Mon May 26 18:08:30 UTC 2025
+- Python: 3.10.19
+- Stable-Baselines3: 2.7.1
+- PyTorch: 2.10.0+cu128
+- GPU Enabled: False
+- Numpy: 2.2.6
+- Cloudpickle: 3.1.2
+- Gymnasium: 1.2.3

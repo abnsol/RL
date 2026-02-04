@@ -20,16 +20,16 @@ class GameConfig:
     time_budget: int = 200
 
     # Agent's energy params (new challenge)
-    initial_energy: int = 100
-    max_energy: int = 100
-    move_energy_cost: float = 2.0
-    stabilize_energy_cost: float = 5.0
+    initial_energy: int = 300
+    max_energy: int = 300
+    move_energy_cost: float = 0.5
+    stabilize_energy_cost: float = 2.0
     wait_energy_gain: float = 3.0
     low_energy_threshold: int = 20
     low_energy_damage_multiplier: float = 1.5  
     
     # Signal nodes
-    num_signals: int = 5
+    num_signals: int = 10
     signal_value: float = 10.0
     
     # Hazards
@@ -47,9 +47,10 @@ class GameConfig:
     time_penalty_per_step: float = -0.01
     stabilization_reward: float = 0.5  # Reward for proactive stabilization
     exploration_bonus: float = 0.1  # Small bonus for visiting new cells
+    energy_depletion_penalty: float = 0.1
     
     # Observation
-    observation_radius: int = 3  # 3x3 grid around agent
+    observation_radius: int = 5  # 3x3 grid around agent
     
     # Seed
     seed: int = None

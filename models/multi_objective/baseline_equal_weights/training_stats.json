@@ -1,0 +1,30 @@
+{
+  "mean_reward": 0.0,
+  "std_reward": 0.0,
+  "component_means": {
+    "signal_collection": 0.9477459016393442,
+    "hazard_damage": -104.11987704918033,
+    "time_cost": -0.5140778688524593,
+    "stabilization": 18.84810450819672,
+    "exploration": 0.8238217213114754,
+    "energy_cost": -8.09815573770491
+  },
+  "component_stds": {
+    "signal_collection": 3.065763991808047,
+    "hazard_damage": 10.390824608781386,
+    "time_cost": 0.3623103942827124,
+    "stabilization": 20.280104532514958,
+    "exploration": 0.4152339171137484,
+    "energy_cost": 7.887044469992995
+  },
+  "num_episodes": 1952,
+  "weights": {
+    "signal_collection": 1.0,
+    "hazard_damage": 1.0,
+    "time_cost": 1.0,
+    "stabilization": 1.0,
+    "exploration": 1.0,
+    "energy_cost": 1.0
+  },
+  "total_timesteps": 100000
+}
