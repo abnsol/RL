@@ -33,12 +33,11 @@ class MultiObjectiveEnv(gym.Wrapper):
     def __init__(self, env: TheLastSignalEnv, weights: Dict[str, float] = None):
         super().__init__(env)
         
-        # Default weights: uniform (all equally important)
         self.default_weights = {
-            "signal_collection": 50.0,   # ⬆️ Increase signal reward
-            "exploration": 5.0,          # ⬇️ Reduce exploration (was 40.0)
-            "hazard_damage": 10.0,       # ⬆️ Increase damage penalty (was 0.5)
-            "stabilization": 2.0,        # ⬆️ Increase survival reward (was 0.05)
+            "signal_collection": 50.0,   
+            "exploration": 5.0,          
+            "hazard_damage": 10.0,       
+            "stabilization": 2.0,        
             "time_cost": 1.0,
             "energy_cost": 0.5,
         }

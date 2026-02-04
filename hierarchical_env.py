@@ -10,15 +10,12 @@ class HierarchicalRewardEnv(gym.Wrapper):
         super().__init__(env)
         
     def step(self, action):
-        # 1. Execute the step in the base environment
         obs, _, terminated, truncated, info = self.env.step(action)
         
-        # Access internal game state to determine current mode
         game = self.env.unwrapped.game
         reward_vec = info["reward_vector"]
         
-        # 2. THE HIERARCHY MANAGER LOGIC
-        # Mode A: SURVIVAL (Priority: Don't die)
+        # SURVIVAL (Priority: Don't die)
         if game.health < 40:
             weights = {
                 "signal_collection": 2.0,
@@ -30,7 +27,7 @@ class HierarchicalRewardEnv(gym.Wrapper):
             }
             mode = "SURVIVAL"
 
-        # Mode B: RECHARGE (Priority: Conserve energy)
+        # RECHARGE (Priority: Conserve energy)
         elif game.energy < 60:
             weights = {
                 "signal_collection": 2.0,

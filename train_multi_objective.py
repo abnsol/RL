@@ -19,10 +19,9 @@ class ComprehensiveLogger(BaseCallback):
         # Check if any episodes finished in this step
         for info in self.locals.get("infos", []):
             if "episode_info" in info or "signals_collected" in info:
-                # This depends on your environment's info structure at termination
                 pass
         
-        # We check the 'dones' to catch end of episodes
+        
         dones = self.locals.get("dones")
         if dones[0]:
             info = self.locals["infos"][0]
@@ -59,14 +58,13 @@ class ComprehensiveLogger(BaseCallback):
 
 def run_step3_experiment():
     config = GameConfig()
-    config.num_signals = 15 # More signals makes it easier to find at first
+    config.num_signals = 15 
     
-    # Weighting to force exploration and signal focus
     weights = {
-            "signal_collection": 50.0,   # ⬆️ Increase signal reward
-            "exploration": 5.0,          # ⬇️ Reduce exploration (was 40.0)
-            "hazard_damage": 10.0,       # ⬆️ Increase damage penalty (was 0.5)
-            "stabilization": 2.0,        # ⬆️ Increase survival reward (was 0.05)
+            "signal_collection": 50.0,   
+            "exploration": 5.0,          
+            "hazard_damage": 10.0,       
+            "stabilization": 2.0,        
             "time_cost": 1.0,
             "energy_cost": 0.5,
         }
